@@ -1,3 +1,6 @@
 {
-    "cmake.sourceDirectory": "/wsl.localhost/Ubuntu/home/ksanghavi/zephyr-workspace/zephyr-course/app"
+    "cmake.sourceDirectory": "/wsl.localhost/Ubuntu/home/ksanghavi/zephyr-workspace/zephyr-course/app",
+    "C_CPP.default.compileCommands": [
+        "${workspaceFolder}/build/compile_commands.json"
+    ]
 }
