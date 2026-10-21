@@ -1,0 +1,16 @@
+identifier: customboard
+name: Custom Board
+type: qemu
+simulation:
+  - name: qemu
+arch: arm
+toolchain:
+  - zephyr
+  - gnuarmemb
+ram: 16
+flash: 256
+testing:
+  default: true
+  ignore_tags:
+    - net
+    - bluetooth

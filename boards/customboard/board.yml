@@ -1,0 +1,6 @@
+board:
+  name: customboard
+  full_name: My Custom Board
+  vendor: nordic
+  socs:
+  - name: nrf51822
