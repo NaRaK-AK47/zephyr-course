@@ -1,7 +1,7 @@
 #include <zephyr/drivers/sensor.h>
 #include <zephyr/logging/log.h>
 #include <zephyr/drivers/gpio.h>
-
+#include "our_driver.h"
 #define DT_DRV_COMPAT our_driver
 
 LOG_MODULE_REGISTER(our_driver, LOG_LEVEL_INF);
@@ -10,15 +10,30 @@ struct our_driver_config {
     struct gpio_dt_spec led;
 };
 
+struct our_driver_data {
+    bool invert;
+    int counts;
+};
+
+static int set_invert_impl(const struct device *dev, bool invert,int counts)
+{
+    struct our_driver_data *data = dev->data;
+
+    data->invert = invert;
+    data->counts = counts;
+    LOG_INF("invert set to %d counts = %d for device %s", invert, data->counts, dev->name);
+    return 0;
+}
+
 static int channel_get_my_impl(const struct device *dev,
      enum sensor_channel chan, 
      struct sensor_value *val)
 
 {
     const struct our_driver_config *cfg = dev->config;
-                 // ON
-    LOG_INF("Led turned off for device %s, channel %d", dev->name, chan);
-    return gpio_pin_set_dt(&cfg->led, 0);  
+    struct our_driver_data *data = dev->data;
+    LOG_INF("Led turned off for device %s, channel %d data->invert = %d data->counts = %d", dev->name, chan, data->invert, data->counts);
+    return gpio_pin_set_dt(&cfg->led, data->invert ? 0 : 1);  
     
 }
 
@@ -27,15 +42,19 @@ static int channel_get_my_impl(const struct device *dev,
 {
 
     const struct our_driver_config *cfg = dev->config;
-    LOG_INF("Led turned on for device %s, channel %d", dev->name, chan);
-    return gpio_pin_set_dt(&cfg->led, 1);  
+    struct our_driver_data *data = dev->data;
+    LOG_INF("Led turned on for device %s, channel %d data->invert = %d data->counts = %d", dev->name, chan, data->invert, data->counts);
+    return gpio_pin_set_dt(&cfg->led, data->invert ? 0 : 1);  
    
 }
 
-static DEVICE_API(sensor,api_iomico_lecture) = {
-    .channel_get = channel_get_my_impl,
-    .sample_fetch = channel_fetch_my_impl,
-};   
+static DEVICE_API(our, api_iomico_lecture) = {
+    .sensor_api = {
+        .sample_fetch = channel_fetch_my_impl,
+        .channel_get  = channel_get_my_impl,
+    },
+    .set_invert = set_invert_impl,
+};  
 
 static int init(const struct device *dev)
 {
@@ -48,10 +67,11 @@ static int init(const struct device *dev)
 }
 
 #define DEV_INST(inst)                                                  \
+    static struct our_driver_data data_##inst;                          \
     static const struct our_driver_config config_##inst = {             \
         .led = GPIO_DT_SPEC_INST_GET(inst, led_gpios),                  \
     };                                                                  \
-    DEVICE_DT_INST_DEFINE(inst, init, NULL, NULL, &config_##inst,       \
+    DEVICE_DT_INST_DEFINE(inst, init, NULL,  &data_##inst, &config_##inst,       \
                           POST_KERNEL, CONFIG_SENSOR_INIT_PRIORITY,     \
                           &api_iomico_lecture)
 
