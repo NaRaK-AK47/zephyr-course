@@ -54,10 +54,32 @@ static int cmd_channel_info_handler(const struct shell *shell, size_t argc, char
 
     return 0;
 }
+
+static int cmd_channel_setInvert_handler(const struct shell *shell, size_t argc, char **argv){
+
+    const struct device *dev = shell_device_get_binding(argv[1]);
+    if (!dev) {
+        shell_error(shell, "Device %s not found", argv[1]);
+        return -ENODEV;
+    }
+    bool invert = (bool)atoi(argv[2]);
+    int counts = atoi(argv[3]);
+
+    int ret = our_driver_set_invert(dev, invert, counts);
+    if (ret) {
+        shell_error(shell, "Failed to set invert flag: %d", ret);
+        return ret;
+    }
+
+    shell_info(shell, "device name : %s , inver set to %s count set to = %d", dev->name, invert ? "true" : "false", counts);
+
+    return 0;
+}
 SHELL_STATIC_SUBCMD_SET_CREATE(our_driver_subcmd,
     SHELL_CMD_ARG(fetch, NULL, "Fetch Channel of our driver", cmd_channel_fetch_handler, 2, 0),
     SHELL_CMD_ARG(read, NULL, "Read Channel of our driver", cmd_channel_get_handler, 2, 0),
     SHELL_CMD_ARG(info, NULL, "Info Channel of our driver", cmd_channel_info_handler, 2, 0),
+    SHELL_CMD_ARG(setInvert, NULL, "Set invert flag for our driver", cmd_channel_setInvert_handler, 4, 0),
     SHELL_SUBCMD_SET_END
 );
 
