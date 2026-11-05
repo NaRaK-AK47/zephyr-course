@@ -5,6 +5,11 @@
 #include <zephyr/device.h>
 #include <zephyr/drivers/sensor.h>
 
+struct our_driver_data {
+    bool invert;
+    int counts;
+};
+
 struct our_driver_api {
     struct sensor_driver_api sensor_api;
     int (*set_invert)(const struct device *dev, bool invert, int counts);

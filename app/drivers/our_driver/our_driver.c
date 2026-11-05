@@ -10,10 +10,7 @@ struct our_driver_config {
     struct gpio_dt_spec led;
 };
 
-struct our_driver_data {
-    bool invert;
-    int counts;
-};
+
 
 static int set_invert_impl(const struct device *dev, bool invert,int counts)
 {
@@ -32,7 +29,7 @@ static int channel_get_my_impl(const struct device *dev,
 {
     const struct our_driver_config *cfg = dev->config;
     struct our_driver_data *data = dev->data;
-    LOG_INF("Led turned off for device %s, channel %d data->invert = %d data->counts = %d", dev->name, chan, data->invert, data->counts);
+    LOG_INF("Called get from our driver %s, channel %d data->invert = %d data->counts = %d", dev->name, chan, data->invert, data->counts);
     return gpio_pin_set_dt(&cfg->led, data->invert ? 0 : 1);  
     
 }
@@ -43,7 +40,7 @@ static int channel_get_my_impl(const struct device *dev,
 
     const struct our_driver_config *cfg = dev->config;
     struct our_driver_data *data = dev->data;
-    LOG_INF("Led turned on for device %s, channel %d data->invert = %d data->counts = %d", dev->name, chan, data->invert, data->counts);
+    LOG_INF("Called fetch from our driver %s, channel %d data->invert = %d data->counts = %d", dev->name, chan, data->invert, data->counts);
     return gpio_pin_set_dt(&cfg->led, data->invert ? 0 : 1);  
    
 }
